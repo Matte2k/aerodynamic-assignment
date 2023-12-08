@@ -1,4 +1,5 @@
-%% test Hess Smith
+%% Hess Smith Method
+% Implemented for multi airfoil configuration and gound effect
 
 clc
 close all
@@ -7,8 +8,6 @@ clear
 addpath mat_functions
 
 %% Input
-
-EffettoSuolo = 0;
 
 U_inf = 1;   % Velocità all'infinito [m/s]
 alpha = 0;   % Angolo di incidenza flusso [°]
@@ -20,7 +19,8 @@ U_inf_normal = [-U_inf(2); U_inf(1)];
 U_inf_normal = U_inf_normal ./ norm(U_inf_normal);
 
 TestCase = 0;
-NCorpi = 2;  % Numero di corpi da analizzare
+NCorpi = 2;             % Numero di corpi da analizzare
+EffettoSuolo = true;    % Effetto suolo presente o meno
 
 CodiceProfilo = cell(NCorpi, 1);
 Chord = zeros(NCorpi, 1);
@@ -29,29 +29,26 @@ LE_X_Position = zeros(NCorpi, 1);
 LE_Y_Position = zeros(NCorpi, 1);
 CalettAng_deg = zeros(NCorpi, 1);
 
-
 % Corpo 1
 CodiceProfilo{1} = '0012';
 Chord(1) = 1;
-NPannelli(1) = 102;
+NPannelli(1) = 101;
 LE_X_Position(1) = 0;
 LE_Y_Position(1) = 2;
 CalettAng_deg(1) = 10;
 
-if NCorpi == 2
-    % Corpo 2
-    CodiceProfilo{2} = '0012';
-    Chord(2) = 1;
-    NPannelli(2) = 102;
-    LE_X_Position(2) = 0;
-    LE_Y_Position(2) = -2;
-    CalettAng_deg(2) = 370;
-end
+% Corpo 2
+CodiceProfilo{2} = '23012';
+Chord(2) = 1;
+NPannelli(2) = 101;
+LE_X_Position(2) = 2;
+LE_Y_Position(2) = 3;
+CalettAng_deg(2) = 25;
 
 
 %% Creazione profilo
-Corpi = cell(NCorpi, 1);
 
+Corpi = cell(NCorpi, 1);
 % Numero profilo:
 for i=1:NCorpi
     [x,y]=createProfile(CodiceProfilo{i},NPannelli(i),Chord(i));
@@ -60,28 +57,12 @@ for i=1:NCorpi
 end
 
 
-%% Traslazione profilo
-
-% Traslazione profili e plot profili traslati
-figure
-for i=1:NCorpi
-    
-    Corpi{i}.x = Corpi{i}.x + LE_X_Position(i);
-    Corpi{i}.y = Corpi{i}.y + LE_Y_Position(i); 
-
-    plot(Corpi{i}.x(:, 1), Corpi{i}.y(:, 1))
-    hold on
-end   
-title('Configurazione intermedia traslata', 'interpreter', 'latex')
-axis equal
-hold off
-
-
 %% Calettamento profilo
 
 % Rotazione profili e plot profili ruotati
 figure
 for i=1:NCorpi
+    
     % Coordinate del centro di rotazione
     xc_rotC = 0.25 * Chord(i) ;  % 1/4*chord
     yc_rotC = 0 ;
@@ -108,49 +89,35 @@ title('Configurazione finale ruotata', 'interpreter', 'latex')
 axis equal
 hold off
 
-%% Effetto suolo
+
+%% Traslazione profilo
+
+% Traslazione profili e plot profili traslati
+figure
+for i=1:NCorpi
+    
+    Corpi{i}.x = Corpi{i}.x + LE_X_Position(i);
+    Corpi{i}.y = Corpi{i}.y + LE_Y_Position(i); 
+
+    plot(Corpi{i}.x(:, 1), Corpi{i}.y(:, 1))
+    hold on
+end   
+title('Configurazione intermedia traslata', 'interpreter', 'latex')
+axis equal
+hold off
+
+
+%% Metodo dell'immagine effetto suolo
 
 if EffettoSuolo
-
-    NCorpi_suolo = 2*NCorpi;
-    Corpi_suolo = cell(NCorpi_suolo, 1);
-    NPannelli_suolo = zeros(NCorpi_suolo, 1);
-    Chord_suolo = zeros(NCorpi_suolo, 1);
-
-    for i = 1:NCorpi_suolo
-        if i <= NCorpi
-            Corpi_suolo{i} = Corpi{i};
-            NPannelli_suolo(i) = NPannelli(i);
-            Chord_suolo(i) = Chord(i);
-        else
-            Corpi_suolo{i}.x = Corpi{i-NCorpi}.x;
-            Corpi_suolo{i}.y = -Corpi{i-NCorpi}.y;
-            Chord_suolo(i) = Chord(i-NCorpi);
-            NPannelli_suolo(i) = NPannelli(i-NCorpi);
-        end
-    end
-    
  
-    NCorpi = NCorpi_suolo;
-    Corpi = cell(NCorpi, 1);
-    Corpi = Corpi_suolo;
-    NPannelli = zeros(NCorpi, 1);
-    NPannelli = NPannelli_suolo;
-    Chord = zeros(NCorpi, 1);
-    Chord = Chord_suolo;
-
-    figure
-    for i=1:NCorpi
-        
-        % Plot della configurazione finale dei profili per effetto suolo
-        plot(Corpi{i}.x(:, 1), Corpi{i}.y(:, 1))
-        hold on
-        axis equal
+    NCorpi_mirror = NCorpi;
+    NPannelli_mirror = NPannelli;
+    Chord_mirror = Chord;
+    Corpi_mirror = Corpi;
+    for i=1:NCorpi_mirror       
+        Corpi_mirror{i}.y = -Corpi{i}.y;
     end
-    title('Configurazione finale effetto suolo', 'interpreter', 'latex')
-    axis equal
-    hold off
-
 end
 
 
@@ -170,6 +137,24 @@ G2L_TransfMatrix = cell(NCorpi, 1);
 for i = 1:NCorpi
     [Centro{i}, Normale{i}, Tangente{i}, Estremo_1{i}, Estremo_2{i}, alpha{i}, lunghezza{i}, L2G_TransfMatrix{i}, G2L_TransfMatrix{i}] = CreaStrutturaPannelli(Corpi{i});
 end        
+
+% Creazione pannelli dei corpi caso effetto suolo
+if EffettoSuolo
+
+    Centro_mirror = cell(NCorpi, 1);
+    Normale_mirror = cell(NCorpi, 1);
+    Tangente_mirror = cell(NCorpi, 1);
+    Estremo_1_mirror = cell(NCorpi, 1);
+    Estremo_2_mirror = cell(NCorpi, 1);
+    alpha_mirror = cell(NCorpi, 1);
+    lunghezza_mirror = cell(NCorpi, 1);
+    L2G_TransfMatrix_mirror = cell(NCorpi, 1);
+    G2L_TransfMatrix_mirror = cell(NCorpi, 1);
+
+    for i = 1:NCorpi_mirror
+        [Centro_mirror{i}, Normale_mirror{i}, Tangente_mirror{i}, Estremo_1_mirror{i}, Estremo_2_mirror{i}, alpha_mirror{i}, lunghezza_mirror{i}, L2G_TransfMatrix_mirror{i}, G2L_TransfMatrix_mirror{i}] = CreaStrutturaPannelli(Corpi_mirror{i});
+    end
+end
 
 % Plot di tutte le singole pannellizzazioni
 title_string = cell(NCorpi, 1);
@@ -199,12 +184,12 @@ TermineNoto = zeros(NRows, 1);
 indexStart_riga = 0;
 for Corpo_i = 1:NCorpi
     for i = 1:NPannelli(Corpo_i)
+        
         index_i = indexStart_riga + i; % riga
+        indexStart_colonna = 0;
     
         Centro_qui = Centro{Corpo_i}(i, :)';
         Normale_qui = Normale{Corpo_i}(i, :)';
-    
-        indexStart_colonna = 0;
     
         for Corpo_j = 1:NCorpi
             for j = 1:NPannelli(Corpo_j)
@@ -212,19 +197,35 @@ for Corpo_i = 1:NCorpi
                 index_j = indexStart_colonna + j;  % colonna
     
                 Estremo_1_qui = Estremo_1{Corpo_j}(j, :)';
-                Estremo_2_qui = Estremo_2{Corpo_j}(j, :)';
-    
+                Estremo_2_qui = Estremo_2{Corpo_j}(j, :)';    
                 L2G_TransfMatrix_qui = squeeze(L2G_TransfMatrix{Corpo_j}(j, :, :));
                 G2L_TransfMatrix_qui = squeeze(G2L_TransfMatrix{Corpo_j}(j, :, :));
     
-                matriceA(index_i, index_j) = dot(ViSorgente(Centro_qui, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui), Normale_qui);
+                Ujs = ViSorgente(Centro_qui, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui);
+                Ujv = ViVortice(Centro_qui, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui);
+                
+                % Caso effetto suolo
+                if EffettoSuolo
+
+                    Estremo_1_qui_mirror = Estremo_1_mirror{Corpo_j}(j, :)';
+                    Estremo_2_qui_mirror = Estremo_2_mirror{Corpo_j}(j, :)';
     
-                matriceA(index_i, sum(NPannelli)+Corpo_j) = matriceA(index_i, sum(NPannelli)+Corpo_j) + dot(ViVortice(Centro_qui, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui), Normale_qui);
+                    L2G_TransfMatrix_qui_mirror = squeeze(L2G_TransfMatrix_mirror{Corpo_j}(j, :, :));
+                    G2L_TransfMatrix_qui_mirror = squeeze(G2L_TransfMatrix_mirror{Corpo_j}(j, :, :));
+
+                    Ujs_mirror = ViSorgente(Centro_qui, Estremo_1_qui_mirror, Estremo_2_qui_mirror, L2G_TransfMatrix_qui_mirror, G2L_TransfMatrix_qui_mirror);
+                    Ujv_mirror = ViVortice(Centro_qui, Estremo_1_qui_mirror, Estremo_2_qui_mirror, L2G_TransfMatrix_qui_mirror, G2L_TransfMatrix_qui_mirror);
+                else
+                    Ujs_mirror = 0;
+                    Ujv_mirror = 0;
+                end
+
+                matriceA(index_i, index_j) = dot( (Ujs + Ujs_mirror), Normale_qui);
+                matriceA(index_i, sum(NPannelli)+Corpo_j) = matriceA(index_i, sum(NPannelli)+Corpo_j) + dot( (Ujv - Ujv_mirror), Normale_qui);
     
             end
     
-            indexStart_colonna = indexStart_colonna + NPannelli(Corpo_j);
-            
+            indexStart_colonna = indexStart_colonna + NPannelli(Corpo_j);            
         end
     end
 
@@ -235,8 +236,7 @@ end
 for Corpo_i = 1:NCorpi
     
     Centro_Start = Centro{Corpo_i}(1, :)';
-    Tangente_Start = Tangente{Corpo_i}(1, :)'; 
-    
+    Tangente_Start = Tangente{Corpo_i}(1, :)';     
     Centro_End = Centro{Corpo_i}(end, :)';
     Tangente_End = Tangente{Corpo_i}(end, :)'; 
     
@@ -253,11 +253,38 @@ for Corpo_i = 1:NCorpi
             L2G_TransfMatrix_qui = squeeze(L2G_TransfMatrix{Corpo_j}(j, :, :));
             G2L_TransfMatrix_qui = squeeze(G2L_TransfMatrix{Corpo_j}(j, :, :));
 
-            a = dot(ViSorgente(Centro_Start, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui), Tangente_Start);
-            b = b + dot(ViVortice(Centro_Start, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui), Tangente_Start);
+            Ujs_start = ViSorgente(Centro_Start, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui);
+            Ujv_start = ViVortice(Centro_Start, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui);
 
-            a = a + dot(ViSorgente(Centro_End, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui), Tangente_End);
-            b = b + dot(ViVortice(Centro_End, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui), Tangente_End);
+            Ujs_end = ViSorgente(Centro_End, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui);
+            Ujv_end = ViVortice(Centro_End, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui);
+
+            % Caso effetto suolo
+            if EffettoSuolo
+
+                Estremo_1_qui_mirror = Estremo_1_mirror{Corpo_j}(j, :)';
+                Estremo_2_qui_mirror = Estremo_2_mirror{Corpo_j}(j, :)';
+                L2G_TransfMatrix_qui_mirror = squeeze(L2G_TransfMatrix_mirror{Corpo_j}(j, :, :));
+                G2L_TransfMatrix_qui_mirror = squeeze(G2L_TransfMatrix_mirror{Corpo_j}(j, :, :));
+
+                Ujs_mirror_start = ViSorgente(Centro_Start, Estremo_1_qui_mirror, Estremo_2_qui_mirror, L2G_TransfMatrix_qui_mirror, G2L_TransfMatrix_qui_mirror);
+                Ujv_mirror_start = ViVortice(Centro_Start, Estremo_1_qui_mirror, Estremo_2_qui_mirror, L2G_TransfMatrix_qui_mirror, G2L_TransfMatrix_qui_mirror);
+            
+                Ujs_mirror_end = ViSorgente(Centro_End, Estremo_1_qui_mirror, Estremo_2_qui_mirror, L2G_TransfMatrix_qui_mirror, G2L_TransfMatrix_qui_mirror);
+                Ujv_mirror_end = ViVortice(Centro_End, Estremo_1_qui_mirror, Estremo_2_qui_mirror, L2G_TransfMatrix_qui_mirror, G2L_TransfMatrix_qui_mirror);     
+            else
+                Ujs_mirror_start = 0;
+                Ujv_mirror_start = 0;
+
+                Ujs_mirror_end = 0;
+                Ujv_mirror_end = 0;
+            end
+
+            a = dot((Ujs_start + Ujs_mirror_start), Tangente_Start);
+            b = b + dot((Ujv_start - Ujv_mirror_start), Tangente_Start);
+
+            a = a + dot((Ujs_end + Ujs_mirror_end), Tangente_End);
+            b = b + dot((Ujv_end - Ujv_mirror_end), Tangente_End);
 
             matriceA(sum(NPannelli) + Corpo_i, index_j) = a;
 
@@ -265,7 +292,6 @@ for Corpo_i = 1:NCorpi
         
         matriceA(sum(NPannelli) + Corpo_i, sum(NPannelli) + Corpo_j) = b;
         indexStart_colonna = indexStart_colonna + NPannelli(Corpo_j);
-        
     end
 end
 
@@ -278,9 +304,7 @@ for Corpo_i = 1:NCorpi
     for j = 1:NPannelli(Corpo_i)
 
         Normale_qui = Normale{Corpo_i}(j, :)'; 
-        
         index = indexStart + j;
-        
         TermineNoto(index) = - dot(U_inf, Normale_qui);
     end
     
@@ -346,10 +370,28 @@ for Corpo_i = 1:NCorpi
                 L2G_TransfMatrix_qui = squeeze(L2G_TransfMatrix{Corpo_j}(j, :, :));
                 G2L_TransfMatrix_qui = squeeze(G2L_TransfMatrix{Corpo_j}(j, :, :));
 
+                % Caso effetto suolo
+                if EffettoSuolo
+    
+                    Estremo_1_qui_mirror = Estremo_1_mirror{Corpo_j}(j, :)';
+                    Estremo_2_qui_mirror = Estremo_2_mirror{Corpo_j}(j, :)';
+                    L2G_TransfMatrix_qui_mirror = squeeze(L2G_TransfMatrix_mirror{Corpo_j}(j, :, :));
+                    G2L_TransfMatrix_qui_mirror = squeeze(G2L_TransfMatrix_mirror{Corpo_j}(j, :, :));
+    
+                    U_Sorgente_mirror = ViSorgente(Centro_qui, Estremo_1_qui_mirror, Estremo_2_qui_mirror, L2G_TransfMatrix_qui_mirror, G2L_TransfMatrix_qui_mirror);
+                    U_Vortice_mirror = ViVortice(Centro_qui, Estremo_1_qui_mirror, Estremo_2_qui_mirror, L2G_TransfMatrix_qui_mirror, G2L_TransfMatrix_qui_mirror);
+                
+                else
+                    U_Sorgente_mirror = 0;
+                    U_Vortice_mirror = 0;
+                end
+
                 U_Sorgente = ViSorgente(Centro_qui, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui);
                 U_Vortice = ViVortice(Centro_qui, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui);
 
-                U_Pannelli{Corpo_i}(i, :) = U_Pannelli{Corpo_i}(i, :) + sigma_mia{Corpo_j}(j) .* U_Sorgente' + gamma_mia(Corpo_j) .* U_Vortice';
+                U_Pannelli{Corpo_i}(i, :) = U_Pannelli{Corpo_i}(i, :) + ...
+                                            sigma_mia{Corpo_j}(j) .* U_Sorgente' + gamma_mia(Corpo_j) .* U_Vortice' + ...
+                                            sigma_mia{Corpo_j}(j) .* U_Sorgente_mirror' - gamma_mia(Corpo_j) .* U_Vortice_mirror' ;
             end
         end
         
@@ -388,13 +430,6 @@ for Corpo_i = 1:NCorpi
     legend_string{Corpo_i} = strcat("Corpo ", num2str(Corpo_i));
 end
 title('$C_P$', 'interpreter', 'latex')
-% Profilo_1 = importdata("Profilo_1.dat");
-% Profilo_2 = importdata("Profilo_2.dat");
-% 
-% plot(Profilo_1(:, 1)-min(Profilo_1(:, 1)), -Profilo_1(:, 2), '*')
-% plot(Profilo_2(:, 1)-min(Profilo_2(:, 1)), -Profilo_2(:, 2), '*')
-% legend_string{3} = strcat("Ale, Corpo ", num2str(1));
-% legend_string{4} = strcat("Ale, Corpo ", num2str(2));
 legend(legend_string, 'interpreter', 'latex')
 
 % Plot profili analizzati
@@ -414,7 +449,7 @@ legend(legend_string, 'interpreter', 'latex')
 %% Render della configurazione studiata
 
 % Attiva/disattiva render a colori della corrente
-ifSaveFigures=true;
+ifSaveFigures = true;
 
 if ifSaveFigures
 
@@ -446,9 +481,8 @@ if ifSaveFigures
 
     isIn = zeros(Nx, Ny);
     
-    t = cputime
     parfor i = 1:Nx
-%         i
+%       i
         for j = 1:Ny
             for Corpo_i = 1:NCorpi
                 Boundary = [Corpi{Corpo_i}.x Corpi{Corpo_i}.y];
@@ -458,8 +492,6 @@ if ifSaveFigures
             end
         end
     end
-    cputime - t
-
 
     U_Mesh = zeros(Nx, Ny);
     V_Mesh = zeros(Nx, Ny);
@@ -467,46 +499,61 @@ if ifSaveFigures
     Cp_Mesh = zeros(Nx, Ny);
 
     t = cputime;
+    parfor PointIndex_i = 1:Nx
+%       PointIndex_i
+        for PointIndex_j = 1:Ny
 
-        parfor PointIndex_i = 1:Nx
-    %       PointIndex_i
-            for PointIndex_j = 1:Ny
+            if(~isIn(PointIndex_i, PointIndex_j))
 
-                if(~isIn(PointIndex_i, PointIndex_j))
+                U = U_inf'; 
+                Centro_qui = [X(PointIndex_i, PointIndex_j); Y(PointIndex_i, PointIndex_j)];
 
-                    U = U_inf'; 
-                    Centro_qui = [X(PointIndex_i, PointIndex_j); Y(PointIndex_i, PointIndex_j)];
+                for Corpo_j = 1:NCorpi
+                    for j = 1:NPannelli(Corpo_j)
 
-                    for Corpo_j = 1:NCorpi
-                        for j = 1:NPannelli(Corpo_j)
+                        Estremo_1_qui = Estremo_1{Corpo_j}(j, :)';             
+                        Estremo_2_qui = Estremo_2{Corpo_j}(j, :)';
+                        L2G_TransfMatrix_qui = squeeze(L2G_TransfMatrix{Corpo_j}(j, :, :));
+                        G2L_TransfMatrix_qui = squeeze(G2L_TransfMatrix{Corpo_j}(j, :, :));
 
-                            Estremo_1_qui = Estremo_1{Corpo_j}(j, :)';             
-                            Estremo_2_qui = Estremo_2{Corpo_j}(j, :)';
-                            L2G_TransfMatrix_qui = squeeze(L2G_TransfMatrix{Corpo_j}(j, :, :));
-                            G2L_TransfMatrix_qui = squeeze(G2L_TransfMatrix{Corpo_j}(j, :, :));
-
-                            U_Sorgente = ViSorgente(Centro_qui, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui);
-                            U_Vortice = ViVortice(Centro_qui, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui);
-
-                            U = U + sigma_mia{Corpo_j}(j) .* U_Sorgente' + gamma_mia(Corpo_j) .* U_Vortice';
-
+                        % Caso effetto suolo
+                        if EffettoSuolo
+            
+                            Estremo_1_qui_mirror = Estremo_1_mirror{Corpo_j}(j, :)';
+                            Estremo_2_qui_mirror = Estremo_2_mirror{Corpo_j}(j, :)';
+                            L2G_TransfMatrix_qui_mirror = squeeze(L2G_TransfMatrix_mirror{Corpo_j}(j, :, :));
+                            G2L_TransfMatrix_qui_mirror = squeeze(G2L_TransfMatrix_mirror{Corpo_j}(j, :, :));
+            
+                            U_Sorgente_mirror = ViSorgente(Centro_qui, Estremo_1_qui_mirror, Estremo_2_qui_mirror, L2G_TransfMatrix_qui_mirror, G2L_TransfMatrix_qui_mirror);
+                            U_Vortice_mirror = ViVortice(Centro_qui, Estremo_1_qui_mirror, Estremo_2_qui_mirror, L2G_TransfMatrix_qui_mirror, G2L_TransfMatrix_qui_mirror);
+                        
+                        else
+                            U_Sorgente_mirror = 0;
+                            U_Vortice_mirror = 0;
                         end
+
+                        U_Sorgente = ViSorgente(Centro_qui, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui);
+                        U_Vortice = ViVortice(Centro_qui, Estremo_1_qui, Estremo_2_qui, L2G_TransfMatrix_qui, G2L_TransfMatrix_qui);
+
+                        U = U + sigma_mia{Corpo_j}(j) .* U_Sorgente' + gamma_mia(Corpo_j) .* U_Vortice' + ...
+                            sigma_mia{Corpo_j}(j) .* U_Sorgente_mirror' - gamma_mia(Corpo_j) .* U_Vortice_mirror'
+
                     end
-
-                    U_Mesh(PointIndex_i, PointIndex_j) = U(1);
-                    V_Mesh(PointIndex_i, PointIndex_j) = U(2);
-                    U_Mesh_Mag(PointIndex_i, PointIndex_j) = norm(U);
-                    Cp_Mesh(PointIndex_i, PointIndex_j) = 1 - norm(U) / norm(U_inf);
-
-                else
-                    U_Mesh(PointIndex_i, PointIndex_j) = NaN;
-                    V_Mesh(PointIndex_i, PointIndex_j) = NaN;
-                    U_Mesh_Mag(PointIndex_i, PointIndex_j) = NaN;
-                    Cp_Mesh(PointIndex_i, PointIndex_j) = NaN;
                 end
+
+                U_Mesh(PointIndex_i, PointIndex_j) = U(1);
+                V_Mesh(PointIndex_i, PointIndex_j) = U(2);
+                U_Mesh_Mag(PointIndex_i, PointIndex_j) = norm(U);
+                Cp_Mesh(PointIndex_i, PointIndex_j) = 1 - norm(U) / norm(U_inf);
+
+            else
+                U_Mesh(PointIndex_i, PointIndex_j) = NaN;
+                V_Mesh(PointIndex_i, PointIndex_j) = NaN;
+                U_Mesh_Mag(PointIndex_i, PointIndex_j) = NaN;
+                Cp_Mesh(PointIndex_i, PointIndex_j) = NaN;
             end
         end
-
+    end
 
     SavingNameStart = "./figures/test_";
 
