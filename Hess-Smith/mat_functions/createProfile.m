@@ -32,7 +32,7 @@ function [x,y] = createProfile(Profilo,NPannelli,Chord)
 
     Corpo = importXfoilProfile(filename);
     
-    % Prima flippa i vettori        WHY????
+    % Prima flippa i vettori
     x = flipud(Corpo.x);
     y = flipud(Corpo.y);
     
