@@ -13,14 +13,16 @@ n  102
 
 oper
 pacc
- NACA0012_ClAlpha.dat
+
 
 aseq
  -2
  2
  1
 pacc
-
+pwrt 
+NACA0012_ClAlpha.dat
+y
 
 quit 
 
