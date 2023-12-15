@@ -19,21 +19,17 @@ function [x,y] = createClAlpha(Profilo,NPannelli,alphaMin,alphaMax,step)
 
     filename = strcat('NACA', Profilo, '_ClAlpha.dat');
 
-    % Elimino precedente file contente polari se esiste
-    if exist(filename,'file')==2
-        delete(filename);
-    end
-
     fprintf(fileID,'oper\n');
-    fprintf(fileID,'pacc\n');
-    fprintf(fileID, [' ' filename '\n\n']);
-
+    fprintf(fileID,'pacc\n\n\n');
     fprintf(fileID, 'aseq\n');
     fprintf(fileID, [' ' num2str(alphaMin) '\n']);
     fprintf(fileID, [' ' num2str(alphaMax) '\n']);
     fprintf(fileID, [' ' num2str(step) '\n']);
-    fprintf(fileID,'pacc\n\n\n');
+    fprintf(fileID,'pacc\n');
 
+    fprintf(fileID, 'pwrt \n');
+    fprintf(fileID, ['' filename '\n']);
+    fprintf(fileID,'y\n\n');
     
     fprintf(fileID,'quit \n\n');
     fclose(fileID);
