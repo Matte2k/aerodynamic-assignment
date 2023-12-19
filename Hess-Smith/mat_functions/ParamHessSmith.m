@@ -26,7 +26,7 @@ function [Cl,Cp,Centro] = ParamHessSmith(U_inf0, alpha, NCorpi, CalettAng, Effet
 %           Centro: coordinate pt. di controllo dei pannelli
 
 
-run Airfoil_input.m     % airfoil data input
+run inputAirfoil.m     % airfoil data input
 
 if nargin < 6 || EffettoSuolo==0      % caso in cui non si specifica altezza da suolo
     hFloor = 0;

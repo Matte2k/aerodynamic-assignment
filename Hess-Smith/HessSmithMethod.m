@@ -30,7 +30,7 @@ LE_Y_Position = zeros(NCorpi, 1);
 CalettAng_deg = zeros(NCorpi, 1);
 
 % Corpo 1
-CodiceProfilo{1} = '23012';
+CodiceProfilo{1} = '0012';
 Chord(1) = 1;
 NPannelli(1) = 101;
 LE_X_Position(1) = 0;

@@ -3,7 +3,13 @@ close all
 clear 
 
 addpath mat_functions
-run Airfoil_input.m
+run inputAirfoil.m
+
+% plot font settings
+fSize = 9;
+fSizeLeg = fSize * 0.8;
+fSizeTit = fSize * 1.1;
+
 
 %% Plot andamento Cp-corda su un singolo profilo
 
@@ -22,24 +28,34 @@ ventreInterv_start = ceil(NPannelli/2);
 [~,Cp_pAlpha,Centro] = ParamHessSmith(U_inf, alpha_Cp, NCorpi, calettAng, EffettoSuolo);
 
 % Comparative plot
-figure
-plot(Centro{1}((1:dorsoInterv_end),1), -Cp_pAlpha{1}((1:dorsoInterv_end),1), '-')
-hold on
-plot(Centro{1}((ventreInterv_start:NPannelli), 1), -Cp_pAlpha{1}((ventreInterv_start:NPannelli), 1), '-')
-plot(Centro{1}(1:NPannelli,1), -Cp_xfoil(1:NPannelli,1), '*')
-title('$C_P$', 'interpreter', 'latex')
-%legend(legend_string, 'interpreter', 'latex')
-ylabel('$C_{P}$', 'interpreter', 'latex')
-xlabel('$x/c$', 'interpreter', 'latex')
-axis padded
-grid on
-
-
+figure_CpCompare = figure;  hold on;
+    plot(Centro{1}((1:dorsoInterv_end),1), -Cp_pAlpha{1}((1:dorsoInterv_end),1), '-', 'LineWidth', 1 , 'Color', 'b')
+    plot(Centro{1}((ventreInterv_start:NPannelli), 1), -Cp_pAlpha{1}((ventreInterv_start:NPannelli), 1), '-', 'LineWidth', 1 , 'Color', 'r')
+    plot(Centro{1}(1:NPannelli,1), -Cp_xfoil(1:NPannelli,1), 'o', 'MarkerSize', 4 , 'Color', 'k')
+    
+    % title and legend definition
+    fontsize(7,"points");
+    legend('HS method dorso', 'HS method ventre','Xfoil', 'fontsize', fSizeLeg, 'interpreter', 'latex')
+    t_string = ['$C_P$ at $\alpha=$ ',num2str(alpha_Cp), '$^{\circ}$'];
+    title(t_string,'fontsize', fSizeTit, 'fontweight', 'bold', 'interpreter', 'latex')
+    
+    % axis definition
+    ylabel('$-C_{P}$ [-]','fontsize', fSize, 'interpreter', 'latex')
+    xlabel('$x/c$ [-]','fontsize', fSize, 'interpreter', 'latex')
+    
+    % layout definition
+    axis padded
+    grid on
+    box on
+    fontname(figure_CpCompare,"Palatino Linotype")
+    set(gcf,'units','centimeters','position',[0,0,10,7]);   % setted for the report layout    
+exportgraphics(figure_CpCompare,'figures\plot_CpCompare.png','Resolution',500);
+   
 
 %% Plot andamento Cl-alpha su un singolo profilo
 
 U_inf = 1;
-alpha_Cl = (-2:1:2)' ;
+alpha_Cl = (-2:1:2)';
 calettAng = 0;
 EffettoSuolo = false;
 
@@ -59,16 +75,29 @@ for i=1:length(alpha_Cl)
 end
 
 % Comparative Plot
-figure
-plot(alpha_Cl(:,1), Cl_pAlpha_vector(:,1), '-')
-hold on
-plot(alpha_xfoil,ClAlpha_xfoil, '*')
-title('$C_{l/\alpha}$', 'interpreter', 'latex')
-xlabel('\alpha')
-ylabel('$C_{l}$', 'interpreter', 'latex')
-axis square
-grid on
+figure_ClAlphaCompare = figure;  hold on;
+    plot(alpha_Cl(:,1), Cl_pAlpha_vector(:,1), '-', 'LineWidth', 1 , 'Color', 'b')
+    plot(alpha_xfoil,ClAlpha_xfoil, 'o', 'MarkerSize', 5 , 'Color', 'r')
+    
+    % title and legend definition
+    fontsize(7,"points");
+    legend('HS method ', 'Xfoil', 'fontsize', fSizeLeg, 'interpreter', 'latex', 'Location','northwest')
+    t_string = '$C_{l/\alpha}$';
+    title(t_string,'fontsize', fSizeTit, 'fontweight', 'bold', 'interpreter', 'latex')
 
+    % axis definition
+    xlabel('$\alpha$ [$^{\circ}$]','fontsize', fSize, 'interpreter', 'latex')
+    ylabel('$C_{l}$ [-]','fontsize', fSize, 'interpreter', 'latex')
+
+    % layout definition
+    axis square
+    axis padded
+    grid on
+    box on
+    fontname(figure_ClAlphaCompare,"Palatino Linotype")
+    set(gcf,'units','centimeters','position',[0,0,7,7]);   % setted for the report layout
+exportgraphics(figure_ClAlphaCompare,'figures\plot_ClAlphaCompare.png','Resolution',500);
+   
 
 %% Plot andamento Cl-altezza-alpha su un singolo profilo
 
@@ -88,7 +117,7 @@ end
 
 % Caso effetto suolo
 EffettoSuolo = true;
-altezzaSuolo = (0:1)';
+altezzaSuolo = (0.5:0.2:1.5)';
 Cl_matrix_Ground = zeros(length(calettAng),length(altezzaSuolo));
 
 for i=1:length(calettAng)
@@ -100,14 +129,72 @@ end
 
 
 % Plot Cl-altezza (parametro alpha)
+figure_GroundEffectHfloor = figure;  hold on;
+    cmap_alpha = winter(length(calettAng));     % colormap definition
+
+    for i=1:length(calettAng)
+        plot(altezzaSuolo(:,1),Cl_matrix_Ground(i,:), 'o-', 'LineWidth', 1, 'Color', cmap_alpha(i,:) )
+        hold on
+    end
+
+    % colorbar definition
+    colormap('winter');
+    clim([calettAng(1),calettAng(end)])
+    cbar_alpha = colorbar('Ticks',calettAng);
+    cbar_alpha.Label.String = '\alpha [°]';
+    
+    % title definition
+    fontsize(7,"points");
+    t_string = '$C_l$ vs h';
+    title(t_string,'fontsize', fSizeTit, 'fontweight', 'bold', 'interpreter', 'latex')
+
+    % axis definition
+    xticks(altezzaSuolo(:,1))
+    xlabel('$h$ [m]','fontsize', fSize, 'interpreter', 'latex')
+    ylabel('$C_{l}$','fontsize', fSize, 'interpreter', 'latex')
+
+    % layout settings
+    axis padded
+    grid on
+    box on
+    fontname(figure_GroundEffectHfloor,"Palatino Linotype")
+    set(gcf,'units','centimeters','position',[0,0,10,7]);   % setted for the report layout
+exportgraphics(figure_GroundEffectHfloor,'figures\plot_GroundEffectHfloor.png','Resolution',500);
 
 
+% Plot Cl-alpha (parametro altezza)
+figure_GroundEffectAlpha = figure;  hold on;
+    cmap_hfloor = winter(length(altezzaSuolo));     % colormap definition
 
-% Plot Cl-altezza (parametro alpha)
+    xf_plot = plot(calettAng(:,1), Cl_matrix_NoGround(:,1), '--');
 
-
-
-% Plot Cl-altezza-alpha 3D
-
-
+    for i=1:length(altezzaSuolo)
+        plot(calettAng(:,1),Cl_matrix_Ground(:,i), 'o-', 'LineWidth', 1, 'Color', cmap_hfloor(i,:) )
+        hold on
+    end
+    
+    % colorbar definition
+    colormap('winter');
+    clim([altezzaSuolo(1),altezzaSuolo(end)])
+    cbar_hloor = colorbar('Ticks',altezzaSuolo);
+    cbar_hloor.Label.String = 'h [m]';
+    
+    % title and legend definition
+    fontsize(7,"points");
+    legend(xf_plot,'xfoil', 'fontsize', fSizeLeg, 'interpreter', 'latex', 'Location','northwest')
+    t_string = '$C_l$ vs $\alpha$';
+    title(t_string,'fontsize', fSizeTit, 'fontweight', 'bold', 'interpreter', 'latex')
+    
+    % axis definition
+    xticks(calettAng(:,1))
+    xlabel('$h$ [m]','fontsize', fSize, 'interpreter', 'latex')
+    ylabel('$C_{l}$','fontsize', fSize, 'interpreter', 'latex')
+    
+    % layout settings
+    axis padded
+    grid on
+    box on
+    fontname(figure_GroundEffectAlpha,"Palatino Linotype")
+    set(gcf,'units','centimeters','position',[0,0,10,7]);   % setted for the report layout
+exportgraphics(figure_GroundEffectAlpha,'figures\plot_GroundEffectAlpha.png','Resolution',500);
 
