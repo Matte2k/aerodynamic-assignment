@@ -569,7 +569,7 @@ if ifSaveFigures
     ylabel('y', 'interpreter', 'latex')
 %   legend("$U_{MAG}$", 'interpreter', 'latex')
     title('Contorno di $U_{MAG}$', 'interpreter', 'latex')
-    SavingName = strcat(SavingNameStart, '_UMag.eps');
+    SavingName = strcat(SavingNameStart, '_UMag.png');
     saveas(UMag_fig, SavingName);
     
     
@@ -584,7 +584,7 @@ if ifSaveFigures
     xlabel('x', 'interpreter', 'latex')
     ylabel('y', 'interpreter', 'latex')
     title('Contorno di $U$', 'interpreter', 'latex')
-    SavingName = strcat(SavingNameStart, '_U.eps');
+    SavingName = strcat(SavingNameStart, '_U.png');
     saveas(U_fig, SavingName);
     
     
@@ -599,7 +599,7 @@ if ifSaveFigures
     xlabel('x', 'interpreter', 'latex')
     ylabel('y', 'interpreter', 'latex')
     title('Contorno di $V$', 'interpreter', 'latex')
-    SavingName = strcat(SavingNameStart, '_V.eps');
+    SavingName = strcat(SavingNameStart, '_V.png');
     saveas(V_fig, SavingName);
 
 
@@ -615,7 +615,7 @@ if ifSaveFigures
     xlabel('x', 'interpreter', 'latex')
     ylabel('y', 'interpreter', 'latex')
     title('Contorno di $U_{MAG}$', 'interpreter', 'latex')
-    SavingName = strcat(SavingNameStart, '_Cp.eps');
+    SavingName = strcat(SavingNameStart, '_Cp.png');
     saveas(Cp_fig, SavingName);
     
     
@@ -632,7 +632,7 @@ if ifSaveFigures
     xlabel('x', 'interpreter', 'latex')
     ylabel('y', 'interpreter', 'latex')
     title('Contorno di $U_{MAG}$ e linee di corrente', 'interpreter', 'latex')
-    SavingName = strcat(SavingNameStart, '_Streamlines.eps');
+    SavingName = strcat(SavingNameStart, '_Streamlines.png');
     saveas(Streamlines_fig, SavingName);
     
 end

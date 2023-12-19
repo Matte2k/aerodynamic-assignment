@@ -141,7 +141,8 @@ figure_GroundEffectHfloor = figure;  hold on;
     colormap('winter');
     clim([calettAng(1),calettAng(end)])
     cbar_alpha = colorbar('Ticks',calettAng);
-    cbar_alpha.Label.String = '\alpha [°]';
+    cbar_alpha.Label.String = '$\alpha$ [$^{\circ}$]';
+    cbar_alpha.Label.Interpreter = 'latex';
     
     % title definition
     fontsize(7,"points");
@@ -177,7 +178,8 @@ figure_GroundEffectAlpha = figure;  hold on;
     colormap('winter');
     clim([altezzaSuolo(1),altezzaSuolo(end)])
     cbar_hloor = colorbar('Ticks',altezzaSuolo);
-    cbar_hloor.Label.String = 'h [m]';
+    cbar_hloor.Label.String = '$h$ [m]';
+    cbar_hloor.Label.Interpreter = 'latex';
     
     % title and legend definition
     fontsize(7,"points");
@@ -195,6 +197,63 @@ figure_GroundEffectAlpha = figure;  hold on;
     grid on
     box on
     fontname(figure_GroundEffectAlpha,"Palatino Linotype")
-    set(gcf,'units','centimeters','position',[0,0,10,7]);   % setted for the report layout
+    set(figure_GroundEffectAlpha,'units','centimeters','position',[0,0,10,7]);   % setted for the report layout
 exportgraphics(figure_GroundEffectAlpha,'figures\plot_GroundEffectAlpha.png','Resolution',500);
 
+
+%% Plot andamento Cp-altezza-alpha su un singolo profilo
+ 
+U_inf = 1;
+alpha = 0;
+NCorpi = 1;
+calettAng = [-4 4 8]';
+altezzaSuolo = [0.5 1]';
+
+cmap_cp = hsv(length(altezzaSuolo)+1);     % colormap definition
+clString = cell(length(altezzaSuolo)+1,1);      % cl string cell definition
+
+tiledlayout(1,length(calettAng));        % multiplot initialization
+
+for i=1:length(calettAng)
+    
+    nexttile
+    hold on;
+    
+    for j=1:length(altezzaSuolo)
+        % Caso effetto suolo
+        [Cl_parGroud,Cp_paraGround,Centro] = ParamHessSmith(U_inf, alpha, NCorpi, calettAng(i), true, altezzaSuolo(j));
+        plot(Centro{1}(:,1), -Cp_paraGround{1}(:,1), '-', 'LineWidth', 1, 'Color', cmap_cp(j,:))
+        clString{j} = ['$C_l$ = ', num2str(Cl_parGroud{1})];
+    end
+
+    % Caso senza effetto suolo
+    [Cl_parNoGroud,Cp_paraNoGround,Centro] = ParamHessSmith(U_inf, alpha, NCorpi, calettAng(i), false);
+    plot(Centro{1}(:,1), -Cp_paraNoGround{1}(:,1), '-', 'LineWidth', 1, 'Color', cmap_cp(end,:))
+    clString{end} = ['$C_l$ = ', num2str(Cl_parNoGroud{1})]; 
+
+    % title and legend definition
+    legend(clString, 'fontsize', fSizeLeg, 'interpreter', 'latex')
+    t_string = ['$\alpha=$ ',num2str(calettAng(i)), '$^{\circ}$'];
+    title(t_string,'fontsize', fSizeTit, 'fontweight', 'bold', 'interpreter', 'latex')
+
+    % axis definition
+    ylabel('$-C_{P}$ [-]','fontsize', fSize, 'interpreter', 'latex')
+    ylim([-1.2 4.5])                                                    % To set manually for the moment
+    xlabel('$x/c$ [-]','fontsize', fSize, 'interpreter', 'latex')
+    grid on
+    box on
+    fontname("Palatino Linotype")
+end
+
+    % colorbar definition
+    alphaColorBar = [altezzaSuolo; 1.5];
+    colormap(cmap_cp);
+    clim([alphaColorBar(1), alphaColorBar(end)])
+    cbar_CpFloor = colorbar('Ticks',alphaColorBar,'TickLabelsMode', 'manual');
+    cbar_CpFloor.TickLabels = {'0.5','1','$\infty$'};
+    cbar_CpFloor.TickLabelInterpreter = 'latex'; 
+    cbar_CpFloor.Label.String = '$h$ [m]';
+    cbar_CpFloor.Label.Interpreter = 'latex';
+
+set(gcf,'units','centimeters','position',[0,0,20,7]);   % setted for the report layout    
+exportgraphics(gcf,'figures\plot_CpCompare.png','Resolution',500);
