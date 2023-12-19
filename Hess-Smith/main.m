@@ -49,13 +49,13 @@ figure_CpCompare = figure;  hold on;
     box on
     fontname(figure_CpCompare,"Palatino Linotype")
     set(gcf,'units','centimeters','position',[0,0,10,7]);   % setted for the report layout    
-exportgraphics(figure_CpCompare,'figures\plot_CpCompare.png','Resolution',500);
+exportgraphics(figure_CpCompare,'figures\plot_CpValidation.png','Resolution',500);
    
 
 %% Plot andamento Cl-alpha su un singolo profilo
 
 U_inf = 1;
-alpha_Cl = (-2:1:2)';
+alpha_Cl = (-4:2:8)';
 calettAng = 0;
 EffettoSuolo = false;
 
@@ -104,7 +104,7 @@ exportgraphics(figure_ClAlphaCompare,'figures\plot_ClAlphaCompare.png','Resoluti
 % Condizione 
 U_inf = 1;
 alpha = 0;
-calettAng = (-2:2)';
+calettAng = (-2:1:4)';
 
 % Caso senza effetto suolo
 EffettoSuolo = false;

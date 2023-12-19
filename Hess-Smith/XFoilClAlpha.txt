@@ -16,9 +16,9 @@ pacc
 
 
 aseq
- -2
+ -4
+ 8
  2
- 1
 pacc
 pwrt 
 NACA0012_ClAlpha.dat
