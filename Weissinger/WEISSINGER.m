@@ -492,6 +492,7 @@ xticks(h_s/unit_chord)
 xlabel('$h/c$ [-]','interpreter', 'latex')
 ylabel('$C_{l}$','interpreter', 'latex')
 fontname(figure_GroundEffectHfloor,"Palatino Linotype")
+box on
 set(figure_GroundEffectHfloor,'units','centimeters','position',[0,0,10,7]);   % setted for the report layout
 exportgraphics(figure_GroundEffectHfloor,"figures\GroundEffectHfloor.png",'Resolution',500);
 
