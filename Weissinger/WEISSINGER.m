@@ -1,31 +1,9 @@
-% WEISSINGER.m computes the velocity around a finite 3D wing, invested by
-% an external flow of U_inf=1.
-% The wing and the tailplane can have multiple displacement realtively to
-% the airstream and their position is described by aerodynamic angles
-%
-% INPUT:
-%   WING properties:
-%       sweep angle            -- lambda                    [deg]
-%       dihedral angle         -- delta                     [deg]
-%       root chord             -- root
-%       semi-wing length       -- L
-%       taper ratio            -- taper
-%       AOA                    -- wing/tail angle of attack [deg]
-%       # of spanwise panels   -- M
-%       # of chordwise panels  -- N
-%
-%   AIRSTREAM properties:
-%       airflow incidence      -- alpha [deg]
-%       sideslip angle         -- beta  [deg]
-%       U                         = 1   [m/s]
-%       rho                       = 1   [kg/m**3]
 
-%% Coefficients computation @ initial conditions
 close all
 clear
 clc
 
-% Initializing path
+
 flpath = pwd;
 addpath(append(flpath,'/main/'));
 
@@ -35,7 +13,7 @@ tic
 alpha     = 0;
 beta      = 0;
 
-% GEOMETRIC properties
+% GEOMETRY
 delta     = 0;
 lambda    = 0;
 root      = 8;
@@ -43,7 +21,7 @@ L         = 15;
 taper     = 1;
 AOA       = 0;
 
-% DISCRETIZATION properties
+% DISCRETIZATION 
 M         = 10;
 N         = 5;
 alpha_vec = linspace(-4,8,30);
@@ -54,7 +32,7 @@ flag = "plot";
 [PANELwing] = PANELING(delta,lambda,AOA,root,taper,L,M,N,flag,[0,0,0]);
 
 % System matrix generation
-% Setting tolerance to avoid singular MATRIX
+
 toll        = 1e-4;
 [MATRIX]    = BIOTSAVART(PANELwing,AOA,M,N,L,toll);
 
@@ -100,7 +78,7 @@ addpath(append(flpath,'/main/'));
 tic
 
 % TAPER RATIO study
-% GEOMETRY properties
+% GEOMETRY
     delta     = 0;
     lambda    = 0;
     root      = 8;
@@ -110,7 +88,7 @@ tic
 % AERODYNAMIC properties
     beta      = 0;
 
-% DISCRETIZATION properties
+% DISCRETIZATION
     M         = 10;
     N         = 5;
     alpha_vec = linspace(0,5,30);
@@ -156,14 +134,14 @@ TEXT = "$\lambda = " + string(TAPERvec) + "$";
 legend(TEXT,'Interpreter','latex','location','best');
 
 % DIHEDRAL study
-% GEOMETRY properties
+% GEOMETRY 
     lambda    = 0;
     root      = 8;
     L         = 30;
     taper     = 1;
     AOA       = 0;
 
-% DIHEDRAL discretization properties
+% DIHEDRAL discretization 
     DELTAvec  = 0:1:5;
 
 % Plotting options
@@ -177,7 +155,7 @@ for delta = DELTAvec
     [PANELwing] = PANELING(delta,lambda,AOA,root,taper,L,M,N,flag,[0,0,0]);
 
     % System matrix generation
-    % Setting tolerance to avoid singular MATRIX 
+    
     toll        = 1e-4;
     [MATRIX]    = BIOTSAVART(PANELwing,AOA,M,N,L,toll);
     
@@ -210,7 +188,7 @@ legend(TEXT,'Interpreter','latex','location','best');
     taper     = 1;
     AOA       = 0;
 
-% DISCRETIZATION properties
+% DISCRETIZATION 
     LAMBDAvec = 0:10:30;
 
 % Plotting options
@@ -225,7 +203,7 @@ for lambda = LAMBDAvec
     [PANELwing] = PANELING(delta,lambda,AOA,root,taper,L,M,N,flag,[0,0,0]);
 
     % System matrix generation
-    % Setting tolerance to avoid singular MATRIX 
+    
     toll        = 1e-4;
     [MATRIX]    = BIOTSAVART(PANELwing,AOA,M,N,L,toll);
     
@@ -261,7 +239,7 @@ close all
 clear
 clc
 
-% Initializing path
+
 flpath = pwd;
 addpath(append(flpath,'/main/'));
 
@@ -384,7 +362,7 @@ toc
 flpath = pwd;
 rmpath(append(flpath,'/main/'));
 
-%% Computing ground effect
+%% ground effect
 close all
 clear
 clc
@@ -594,6 +572,7 @@ legend(und_plot1,'No ground','fontsize', fSizeLeg, 'interpreter', 'latex', 'Loca
 grid on
 axis padded
 fontname(figure_GroundEffectAlpha,"Palatino Linotype")
+box on
 set(figure_GroundEffectAlpha,'units','centimeters','position',[0,0,10,7]);   % setted for the report layout
 exportgraphics(figure_GroundEffectAlpha,"figures\GroundEffectAlpha.png",'Resolution',500);
 
@@ -605,6 +584,7 @@ legend(und_plot3,'No ground','fontsize', fSizeLeg, 'interpreter', 'latex', 'Loca
 grid on
 axis padded
 fontname(figure_DragPolar,"Palatino Linotype")
+box on
 set(figure_DragPolar,'units','centimeters','position',[0,0,10,7]);   % setted for the report layout
 exportgraphics(figure_DragPolar,"figures\DragPolar.png",'Resolution',500);
 
@@ -618,6 +598,7 @@ axis padded
 xlim([-0.5e-4 2.5e-4])    
 ylim([0 0.1])
 fontname(figure_DragPolarZoom,"Palatino Linotype")
+box on
 set(figure_DragPolarZoom,'units','centimeters','position',[0,0,10,7]);   % setted for the report layout
 exportgraphics(figure_DragPolarZoom,"figures\DragPolarZoom.png",'Resolution',500);
 
