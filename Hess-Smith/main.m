@@ -35,7 +35,7 @@ figure_CpCompare = figure;  hold on;
     
     % title and legend definition
     fontsize(7,"points");
-    legend('HS method dorso', 'HS method ventre','Xfoil', 'fontsize', fSizeLeg, 'interpreter', 'latex')
+    legend('HS method ventre', 'HS method dorso','Xfoil', 'fontsize', fSizeLeg, 'interpreter', 'latex')
     t_string = ['$C_P$ at $\alpha=$ ',num2str(alpha_Cp), '$^{\circ}$'];
     title(t_string,'fontsize', fSizeTit, 'fontweight', 'bold', 'interpreter', 'latex')
     
@@ -82,7 +82,7 @@ figure_ClAlphaCompare = figure;  hold on;
     % title and legend definition
     fontsize(7,"points");
     legend('HS method ', 'Xfoil', 'fontsize', fSizeLeg, 'interpreter', 'latex', 'Location','northwest')
-    t_string = '$C_{l/\alpha}$';
+    t_string = '$C_{l}$ / $\alpha$';
     title(t_string,'fontsize', fSizeTit, 'fontweight', 'bold', 'interpreter', 'latex')
 
     % axis definition
@@ -104,7 +104,7 @@ exportgraphics(figure_ClAlphaCompare,'figures\plot_ClAlphaCompare.png','Resoluti
 % Condizione 
 U_inf = 1;
 alpha = 0;
-calettAng = (-2:1:4)';
+calettAng = (-2:1:6)';
 
 % Caso senza effetto suolo
 EffettoSuolo = false;
@@ -117,7 +117,7 @@ end
 
 % Caso effetto suolo
 EffettoSuolo = true;
-altezzaSuolo = (0.5:0.2:1.5)';
+altezzaSuolo = [0.2 0.4 0.6 0.8 1]';
 Cl_matrix_Ground = zeros(length(calettAng),length(altezzaSuolo));
 
 for i=1:length(calettAng)
@@ -151,7 +151,7 @@ figure_GroundEffectHfloor = figure;  hold on;
 
     % axis definition
     xticks(altezzaSuolo(:,1))
-    xlabel('$h$ [m]','fontsize', fSize, 'interpreter', 'latex')
+    xlabel('$h/c$ [-]','fontsize', fSize, 'interpreter', 'latex')
     ylabel('$C_{l}$','fontsize', fSize, 'interpreter', 'latex')
 
     % layout settings
@@ -178,7 +178,7 @@ figure_GroundEffectAlpha = figure;  hold on;
     colormap('winter');
     clim([altezzaSuolo(1),altezzaSuolo(end)])
     cbar_hloor = colorbar('Ticks',altezzaSuolo);
-    cbar_hloor.Label.String = '$h$ [m]';
+    cbar_hloor.Label.String = '$h/c$ [-]';
     cbar_hloor.Label.Interpreter = 'latex';
     
     % title and legend definition
@@ -189,7 +189,7 @@ figure_GroundEffectAlpha = figure;  hold on;
     
     % axis definition
     xticks(calettAng(:,1))
-    xlabel('$h$ [m]','fontsize', fSize, 'interpreter', 'latex')
+    xlabel('$\alpha$ [$^{\circ}$]','fontsize', fSize, 'interpreter', 'latex') 
     ylabel('$C_{l}$','fontsize', fSize, 'interpreter', 'latex')
     
     % layout settings
@@ -201,13 +201,52 @@ figure_GroundEffectAlpha = figure;  hold on;
 exportgraphics(figure_GroundEffectAlpha,'figures\plot_GroundEffectAlpha.png','Resolution',500);
 
 
+% Plot Cl-alpha ZOOM (parametro altezza)
+figure_GroundEffectAlphaZoom = figure;  hold on;
+    cmap_hfloor = winter(length(altezzaSuolo));     % colormap definition
+
+    xf_plot = plot(calettAng(:,1), Cl_matrix_NoGround(:,1), '--');
+
+    for i=1:length(altezzaSuolo)
+        plot(calettAng(:,1),Cl_matrix_Ground(:,i), 'o-', 'LineWidth', 1, 'Color', cmap_hfloor(i,:) )
+        hold on
+    end
+    
+    % colorbar definition
+    colormap('winter');
+    clim([altezzaSuolo(1),altezzaSuolo(end)])
+    cbar_hloor = colorbar('Ticks',altezzaSuolo);
+    cbar_hloor.Label.String = '$h/c$ [-]';
+    cbar_hloor.Label.Interpreter = 'latex';
+    
+    % title and legend definition
+    fontsize(7,"points");
+    legend(xf_plot,'xfoil', 'fontsize', fSizeLeg, 'interpreter', 'latex', 'Location','northwest')
+    t_string = '$C_l$ vs $\alpha$ $zoom$';
+    title(t_string,'fontsize', fSizeTit, 'fontweight', 'bold', 'interpreter', 'latex')
+    
+    % axis definition
+    xticks(calettAng(:,1))
+    xlabel('$\alpha$ [$^{\circ}$]','fontsize', fSize, 'interpreter', 'latex')
+    ylabel('$C_{l}$','fontsize', fSize, 'interpreter', 'latex')
+    
+    % layout settings
+    axis padded
+    grid on
+    box on
+     xlim([2.8 6.2])
+    fontname(figure_GroundEffectAlphaZoom,"Palatino Linotype")
+    set(figure_GroundEffectAlphaZoom,'units','centimeters','position',[0,0,10,7]);   % setted for the report layout
+exportgraphics(figure_GroundEffectAlphaZoom,'figures\plot_GroundEffectAlphaZoom.png','Resolution',500);
+
+
 %% Plot andamento Cp-altezza-alpha su un singolo profilo
  
 U_inf = 1;
 alpha = 0;
 NCorpi = 1;
-calettAng = [-4 4 8]';
-altezzaSuolo = [0.5 1]';
+calettAng = [2 4 8]';
+altezzaSuolo = [0.2 0.8]';
 
 cmap_cp = hsv(length(altezzaSuolo)+1);     % colormap definition
 clString = cell(length(altezzaSuolo)+1,1);      % cl string cell definition
@@ -238,7 +277,7 @@ for i=1:length(calettAng)
 
     % axis definition
     ylabel('$-C_{P}$ [-]','fontsize', fSize, 'interpreter', 'latex')
-    ylim([-1.2 4.5])                                                    % To set manually for the moment
+    ylim([-1.2 5])                                                    % To set manually for the moment
     xlabel('$x/c$ [-]','fontsize', fSize, 'interpreter', 'latex')
     grid on
     box on
@@ -246,13 +285,13 @@ for i=1:length(calettAng)
 end
 
     % colorbar definition
-    alphaColorBar = [altezzaSuolo; 1.5];
+    alphaColorBar = [altezzaSuolo; 1.4];
     colormap(cmap_cp);
     clim([alphaColorBar(1), alphaColorBar(end)])
     cbar_CpFloor = colorbar('Ticks',alphaColorBar,'TickLabelsMode', 'manual');
-    cbar_CpFloor.TickLabels = {'0.5','1','$\infty$'};
+    cbar_CpFloor.TickLabels = {'0.2','0.8', '$\infty$'};            % To set manually for the moment
     cbar_CpFloor.TickLabelInterpreter = 'latex'; 
-    cbar_CpFloor.Label.String = '$h$ [m]';
+    cbar_CpFloor.Label.String = '$h/c$ [-]';
     cbar_CpFloor.Label.Interpreter = 'latex';
 
 set(gcf,'units','centimeters','position',[0,0,20,7]);   % setted for the report layout    
